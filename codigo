@@ -1,0 +1,67 @@
+CREATE DATABASE universidade;
+
+USE universidade;
+
+CREATE TABLE Curso (
+  id_curso INT PRIMARY KEY,
+  nome VARCHAR(50) NOT NULL,
+  descricao TEXT
+);
+
+CREATE TABLE Aluno (
+  id_aluno INT PRIMARY KEY,
+  nome VARCHAR(50) NOT NULL,
+  sobrenome VARCHAR(50) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  data_nascimento DATE NOT NULL,
+  curso_id INT,
+  FOREIGN KEY (curso_id) REFERENCES Curso(id_curso)
+);
+
+CREATE TABLE Professor (
+  id_professor INT PRIMARY KEY,
+  nome VARCHAR(50) NOT NULL,
+  sobrenome VARCHAR(50) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  curso_id INT,
+  FOREIGN KEY (curso_id) REFERENCES Curso(id_curso)
+);
+
+DELIMITER //
+
+CREATE PROCEDURE insertcurso(
+  IN p_nome VARCHAR(50),
+  IN p_descricao TEXT
+)
+BEGIN
+  INSERT INTO Curso (nome, descricao)
+  VALUES (p_nome, p_descricao);
+END;
+//
+
+CREATE PROCEDURE selectcurso()
+BEGIN
+  SELECT * FROM Curso;
+END;
+//
+
+CREATE PROCEDURE insertaluno(
+  IN p_nome VARCHAR(50),
+  IN p_sobrenome VARCHAR(50),
+  IN p_data_nascimento DATE,
+  IN p_curso_id INT
+)
+BEGIN
+  DECLARE email VARCHAR(100);
+  DECLARE count INT;
+  SET email = CONCAT(p_nome, '.', p_sobrenome, '@dominio.com');
+  SET count = (SELECT COUNT(*) FROM Aluno WHERE email = email);
+  IF count > 0 THEN
+    SET email = CONCAT(p_nome, '.', p_sobrenome, '_', count, '@dominio.com');
+  END IF;
+  INSERT INTO Aluno (nome, sobrenome, email, data_nascimento, curso_id)
+  VALUES (p_nome, p_sobrenome, email, p_data_nascimento, p_curso_id);
+END;
+//
+
+DELIMITER ;
